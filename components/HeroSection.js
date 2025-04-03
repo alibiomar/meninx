@@ -51,7 +51,7 @@ export default function HeroSection() {
       <div className="max-w-7xl mx-auto relative">
         <div className="relative z-10 pb-5 pt-16 lg:pt-0">
           <div className="mx-auto max-w-7xl px-4 sm:px-6 md:px-8">
-            <div className="flex flex-col lg:flex-row lg:items-center lg:justify-center h-screen lg:gap-16">
+            <div className="flex flex-col lg:flex-row lg:items-center lg:justify-center min-h-screen lg:gap-16">
               {/* Section de contenu */}
               <div className="lg:w-1/2">
                 <motion.div 
