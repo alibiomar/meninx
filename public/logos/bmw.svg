@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg id="Layer_1" data-name="Layer 1" xmlns="http://www.w3.org/2000/svg" version="1.1" viewBox="0 0 2500 2500">
+  <defs>
+    <style>
+      .cls-1 {
+        font-size: 370px;
+      }
+
+      .cls-1, .cls-2, .cls-3 {
+        fill: #8e8e8e;
+      }
+
+      .cls-1, .cls-3 {
+        font-family: Helvetica-Bold, Helvetica;
+        font-weight: 700;
+        isolation: isolate;
+      }
+
+      .cls-4 {
+        display: none;
+        fill: #fff;
+      }
+
+      .cls-4, .cls-2 {
+        stroke-width: 0px;
+      }
+
+      .cls-3 {
+        font-size: 370px;
+      }
+    </style>
+  </defs>
+  <path class="cls-4" d="M-2336.9,2150.8c0,326.1,264.4,590.5,590.5,590.5h.2v-590.5h-590.7Z"/>
+  <g>
+    <path class="cls-2" d="M1250,0C559.6,0,0,559.6,0,1250s559.6,1250,1250,1250,1250-559.6,1250-1250S1940.4,0,1250,0ZM1250,2370.6c-618.9,0-1120.6-501.7-1120.6-1120.6S631.1,129.4,1250,129.4s1120.6,501.7,1120.6,1120.6-501.7,1120.6-1120.6,1120.6Z"/>
+    <g>
+      <text class="cls-3" transform="translate(677.2 726.3) rotate(-28.4)"><tspan x="0" y="0">B</tspan></text>
+      <text class="cls-1" transform="translate(1084.4 549) rotate(-1.3)"><tspan x="0" y="0">M</tspan></text>
+      <text class="cls-3" transform="translate(1567.7 578) rotate(28)"><tspan x="0" y="0">W</tspan></text>
+    </g>
+    <path class="cls-2" d="M1880.2,1250.1h0c0-348-282.1-630.1-630.1-630.1h0c-348,0-630.1,282.1-630.1,630.1h-.2c0,348,282.1,630.1,630.1,630.1h.2c348,0,630.1-282.1,630.1-630.1h0ZM1250.2,1840.6c-326.1.1-590.6-264.2-590.7-590.3v-.2h590.7v590.5ZM1250.2,1250.1v-590.5c326.1,0,590.5,264.4,590.5,590.5h-590.5Z"/>
+  </g>
+  <path class="cls-4" d="M-1155.9,2150.8c0-326-264.3-590.4-590.3-590.5v590.5h590.3Z"/>
+</svg>
