@@ -4,12 +4,15 @@ import { useEffect, useState } from 'react';
 import { fetchAccessories } from '@/lib/supabase';
 import ProductCard from './ProductCard';
 import ProductModal from './ProductModal';
-import { Search, Filter, ChevronDown, ChevronLeft, ChevronRight } from 'lucide-react';
-import { Swiper, SwiperSlide } from 'swiper/react';
-import { Pagination, Navigation } from 'swiper/modules';
-import 'swiper/css';
-import 'swiper/css/pagination';
-import 'swiper/css/navigation';
+import { Search, Filter, ChevronDown } from 'lucide-react';
+import {
+  Pagination,
+  PaginationContent,
+  PaginationItem,
+  PaginationLink,
+  PaginationPrevious,
+  PaginationNext,
+} from '@/components/ui/pagination';
 
 export default function ProductsShowcase() {
     const [products, setProducts] = useState([]);
@@ -21,6 +24,8 @@ export default function ProductsShowcase() {
     const [sortOption, setSortOption] = useState('featured');
     const [isFilterOpen, setIsFilterOpen] = useState(false);
     const [selectedProduct, setSelectedProduct] = useState(null);
+    const [currentPage, setCurrentPage] = useState(1);
+    const itemsPerPage = 4;
 
     useEffect(() => {
         const loadProducts = async () => {
@@ -72,7 +77,14 @@ export default function ProductsShowcase() {
         }
 
         setFilteredProducts(result);
+        setCurrentPage(1); // Reset to first page when filters change
     }, [products, selectedCategory, searchTerm, sortOption]);
+
+    // Pagination calculations
+    const indexOfLastItem = currentPage * itemsPerPage;
+    const indexOfFirstItem = indexOfLastItem - itemsPerPage;
+    const currentProducts = filteredProducts.slice(indexOfFirstItem, indexOfLastItem);
+    const totalPages = Math.ceil(filteredProducts.length / itemsPerPage);
 
     const clearFilters = () => {
         setSearchTerm('');
@@ -121,8 +133,11 @@ export default function ProductsShowcase() {
         </div>
     );
 
+    if (loading) return <LoadingState />;
+    if (error) return <ErrorState />;
+
     return (
-        <section className="relative py-20 px-4 md:px-8 bg-gray-50" id="accessoires">
+        <section className="relative py-20 px-4 md:px-8 bg-gray-50 min-h-screen" id="accessoires">
             <div className="max-w-7xl mx-auto">
                 <div className="flex flex-col md:flex-row justify-between items-center mb-8 gap-6">
                     <div className="text-center md:text-left">
@@ -212,7 +227,8 @@ export default function ProductsShowcase() {
                 </div>
                 <div className="mb-6 flex justify-between items-center px-2">
                     <p className="text-gray-500 font-medium">
-                        Affichage de {filteredProducts.length} résultats
+                        Affichage de {indexOfFirstItem + 1}-{Math.min(indexOfLastItem, filteredProducts.length)} 
+                        sur {filteredProducts.length} résultats
                     </p>
                     {(searchTerm || selectedCategory !== 'Tous') && (
                         <button
@@ -231,41 +247,64 @@ export default function ProductsShowcase() {
                 {filteredProducts.length === 0 ? (
                     <EmptyState />
                 ) : (
-                    <div className="relative group">
-                        <Swiper style={{
-    "--swiper-pagination-color": "#ee0000",
-    "--swiper-pagination-bullet-inactive-color": "#999999",
-    "--swiper-pagination-bullet-inactive-opacity": "1",
-    "--swiper-pagination-bullet-size": "10px", 
-}}
-                            modules={[Pagination, Navigation]}
-                            spaceBetween={24}
-                            slidesPerView={1}
-                            breakpoints={{
-                                640: { slidesPerView: 2 },
-                                1024: { slidesPerView: 3 },
-                                1280: { slidesPerView: 4 },
-                            }}
-                            pagination={{
-                                clickable: true,
-                                dynamicBullets: true,
-
-                            }}
-
-                            className="pb-12"
-                        >
-                            {filteredProducts.map(product => (
-                                <SwiperSlide style={{
-                                    display: "flex",
-                                    alignItems: "center",
-                                    justifyContent: "center",
-                                  }}  key={product.id}>
-                                    <ProductCard product={product} onOpenModal={setSelectedProduct} />
-                                </SwiperSlide>
+                    <>
+                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+                            {currentProducts.map(product => (
+                                <ProductCard 
+                                    key={product.id} 
+                                    product={product} 
+                                    onOpenModal={setSelectedProduct} 
+                                />
                             ))}
+                        </div>
 
-                        </Swiper>
-                    </div>
+                        {totalPages > 1 && (
+                            <div className="mt-8">
+                                <Pagination>
+                                    <PaginationContent>
+                                        <PaginationItem>
+                                            <PaginationPrevious
+                                                href="#"
+                                                onClick={(e) => {
+                                                    e.preventDefault();
+                                                    setCurrentPage(prev => Math.max(1, prev - 1));
+                                                }}
+                                                disabled={currentPage === 1}
+                                                className={currentPage === 1 ? 'opacity-50 cursor-not-allowed' : ''}
+                                            />
+                                        </PaginationItem>
+                                        
+                                        {Array.from({ length: totalPages }, (_, i) => (
+                                            <PaginationItem key={i}>
+                                                <PaginationLink
+                                                    href="#"
+                                                    onClick={(e) => {
+                                                        e.preventDefault();
+                                                        setCurrentPage(i + 1);
+                                                    }}
+                                                    isActive={currentPage === i + 1}
+                                                >
+                                                    {i + 1}
+                                                </PaginationLink>
+                                            </PaginationItem>
+                                        ))}
+
+                                        <PaginationItem>
+                                            <PaginationNext
+                                                href="#"
+                                                onClick={(e) => {
+                                                    e.preventDefault();
+                                                    setCurrentPage(prev => Math.min(totalPages, prev + 1));
+                                                }}
+                                                disabled={currentPage === totalPages}
+                                                className={currentPage === totalPages ? 'opacity-50 cursor-not-allowed' : ''}
+                                            />
+                                        </PaginationItem>
+                                    </PaginationContent>
+                                </Pagination>
+                            </div>
+                        )}
+                    </>
                 )}
                 {selectedProduct && (
                     <ProductModal

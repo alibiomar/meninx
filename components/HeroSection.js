@@ -70,7 +70,7 @@ export default function HeroSection() {
                   
                   <motion.h1 
                     variants={fadeInUp}
-                    className="text-5xl font-bold text-white sm:text-6xl md:text-7xl tracking-tight"
+                    className="text-4xl font-bold text-white sm:text-6xl md:text-7xl tracking-tight"
                   >
                     Conduisez votre rêve&nbsp;
                     <span className="bg-gradient-to-r from-red-500 to-red-400 bg-clip-text text-transparent
@@ -107,46 +107,36 @@ export default function HeroSection() {
                     ))}
                   </motion.div>
                   
-                  {/* Boutons d'action */}
-                  <motion.div 
-                    variants={fadeInUp}
-                    className="flex flex-col sm:flex-row gap-4"
-                  >
-                    <motion.a
-                        whileHover={{ scale: 1.05 }}
-                        whileTap={{ scale: 0.95 }}
-                        animate={{
-                          scale: [1, 1.15, 1], // Slight breathing effect
-                        }}
-                        transition={{
-                          duration: 3, // Slower breathing effect
-                          repeat: Infinity, // Loop forever
-                          repeatType: "reverse", // Smooth transition back and forth
-                          ease: "easeInOut", // Natural feel
-                        }}
-                        href="#location"
-                        onClick={(e) => scrollToSection(e, '#location')}
-                        className="flex items-center justify-center px-8 py-4 bg-red-600 text-white font-bold rounded-lg 
-                        hover:bg-red-700 transition-all duration-300 group shadow-lg shadow-red-900/30"
-                      >
-                        <Calendar className="mr-3 h-5 w-5 group-hover:animate-pulse" />
-                        Louer maintenant
-                        <div className="ml-3 w-0 h-5 border-r border-white/30 group-hover:w-5 transition-all duration-300" />
-                      </motion.a>
+{/* Boutons d'action */}
+<motion.div 
+  variants={fadeInUp}
+  className="flex flex-col justify-center items-center sm:flex-row gap-6 pt-5 md:pt-0 md:gap-8 w-full"
+>
+  <motion.a
+    whileHover={{ scale: 1.05 }}
+    whileTap={{ scale: 0.95 }}
+    href="#location"
+    onClick={(e) => scrollToSection(e, '#location')}
+    className="flex items-center justify-center px-8 py-4 md:px-6 md:py-4 bg-red-600 text-white font-bold rounded-lg 
+    hover:bg-red-700 transition-all duration-300 group shadow-lg shadow-red-900/30 text-md md:text-sm w-auto sm:w-full"
+  >
+    <Calendar className="mr-3 h-4 w-4 md:h-5 md:w-5 group-hover:animate-pulse" />
+    Louer maintenant
+    <div className="ml-3 w-0 h-6 border-r border-white/30 group-hover:w-5 transition-all duration-300" />
+  </motion.a>
 
-
-                    <motion.a
-                      whileHover={{ scale: 1.05 }}
-                      whileTap={{ scale: 0.95 }}
-                      href="#accessoires"
-                      onClick={(e) => scrollToSection(e, '#accessoires')}
-                      className="flex items-center justify-center px-8 py-4 bg-white/10 text-white font-bold rounded-lg 
-                      hover:bg-white/20 transition-all duration-300 group shadow-lg shadow-white/10"
-                    >
-                      Parcourir les accessoires
-                      <ArrowRight className="ml-3 h-5 w-5 transform group-hover:translate-x-2 transition-transform" />
-                    </motion.a>
-                  </motion.div>
+  <motion.a
+    whileHover={{ scale: 1.05 }}
+    whileTap={{ scale: 0.95 }}
+    href="#accessoires"
+    onClick={(e) => scrollToSection(e, '#accessoires')}
+    className="flex items-center justify-center px-4 py-3 md:px-6 md:py-4 bg-white/10 text-white font-bold rounded-lg 
+    hover:bg-white/20 transition-all duration-300 group shadow-lg shadow-white/10 text-sm md:text-sm w-2/3 sm:w-full"
+  >
+    Parcourir les accessoires
+    <ArrowRight className="ml-3 h-6 w-6 md:h-7 md:w-7 transform group-hover:translate-x-2 transition-transform" />
+  </motion.a>
+</motion.div>
                 </motion.div>
               </div>
               

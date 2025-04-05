@@ -1,10 +1,15 @@
 import React, { useState, useEffect } from 'react';
 import { getCars, checkCarAvailability, createReservation } from '@/lib/supabase';
-import { Swiper, SwiperSlide } from 'swiper/react';
-import 'swiper/css';
-import 'swiper/css/navigation';
-import 'swiper/css/pagination';
-import { Navigation, Pagination } from 'swiper/modules';
+import { fr } from 'date-fns/locale'; 
+import { Calendar } from '@/components/ui/calendar';
+import {
+  Pagination,
+  PaginationContent,
+  PaginationItem,
+  PaginationLink,
+  PaginationPrevious,
+  PaginationNext,
+} from '@/components/ui/pagination';
 
 // Fonction de notification par email
 const sendAdminEmail = async (reservationData) => {
@@ -45,6 +50,15 @@ const CarRentalSystem = () => {
   // Période de location
   const [rentalPeriod, setRentalPeriod] = useState({ startDate: '', endDate: '' });
 
+  // Pagination pour les voitures
+  const [currentPage, setCurrentPage] = useState(1);
+  const carsPerPage = 3;
+  const totalPages = Math.ceil(filteredCars.length / carsPerPage);
+  const paginatedCars = filteredCars.slice(
+    (currentPage - 1) * carsPerPage,
+    currentPage * carsPerPage
+  );
+
   // Résumé de la location
   const [rentalSummary, setRentalSummary] = useState({ days: 0, totalPrice: 0, isAvailable: true });
 
@@ -74,6 +88,7 @@ const CarRentalSystem = () => {
       return priceMatch && transmissionMatch && categoryMatch;
     });
     setFilteredCars(filtered);
+    setCurrentPage(1); // Reset to first page when filters change
   }, [filters, cars]);
 
   // Calculer les détails de la location
@@ -116,10 +131,15 @@ const CarRentalSystem = () => {
     setCustomerInfo((prev) => ({ ...prev, [name]: value }));
   };
 
-  const handleDateChange = (e) => {
-    const { name, value } = e.target;
-    setRentalPeriod((prev) => ({ ...prev, [name]: value }));
-  };
+const handleDateChange = (date, type) => {
+  const formattedDate = date.toLocaleDateString('en-CA'); // Format as YYYY-MM-DD
+  if (type === 'start') {
+    setRentalPeriod((prev) => ({ ...prev, startDate: formattedDate }));
+  } else {
+    setRentalPeriod((prev) => ({ ...prev, endDate: formattedDate }));
+  }
+};
+
 
   const handleFilterChange = (name, value) => {
     setFilters((prev) => ({ ...prev, [name]: value }));
@@ -204,13 +224,17 @@ const CarRentalSystem = () => {
     setStep(step - 1);
   };
 
+  const handlePageChange = (page) => {
+    setCurrentPage(page);
+  };
+
   // Rendu des composants
   const renderCarCard = (car) => {
     const isSelected = selectedCar?.id === car.id;
     return (
       <div
         key={car.id}
-        className={`p-6 rounded-lg  ${
+        className={`p-6 rounded-lg ${
           isSelected ? 'ring-4 ring-red-600 bg-red-50' : 'border border-gray-100'
         }`}
         onClick={() => handleCarSelect(car)}
@@ -403,34 +427,39 @@ const CarRentalSystem = () => {
           <p className="text-gray-500 font-medium text-lg">Aucune voiture ne correspond à vos filtres. Veuillez ajuster vos critères.</p>
         </div>
       ) : (
-        <Swiper style={{
-          "--swiper-pagination-color": "#ee0000",
-          "--swiper-pagination-bullet-inactive-color": "#999999",
-          "--swiper-pagination-bullet-inactive-opacity": "1",
-          "--swiper-pagination-bullet-size": "10px", 
-          height: "500px", 
-          
-
-      }}
-          modules={[Navigation, Pagination]}
-          spaceBetween={20}
-          slidesPerView={1}
-          pagination={{ clickable: true,dynamicBullets: true,
-          }}
-          breakpoints={{
-            640: { slidesPerView: 1 },
-            768: { slidesPerView: 2 },
-            1024: { slidesPerView: 3 },
-          }}
-        >
-          {filteredCars.map((car, index) => (
-            <SwiperSlide       style={{
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
-            }} key={index}>{renderCarCard(car)}</SwiperSlide>
-          ))}
-        </Swiper>
+        <>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+            {paginatedCars.map((car) => renderCarCard(car))}
+          </div>
+          {totalPages > 1 && (
+            <Pagination>
+              <PaginationContent>
+                {currentPage > 1 && (
+                  <PaginationItem>
+                    <PaginationPrevious onClick={() => handlePageChange(currentPage - 1)} />
+                  </PaginationItem>
+                )}
+                
+                {Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => (
+                  <PaginationItem key={page}>
+                    <PaginationLink 
+                      onClick={() => handlePageChange(page)}
+                      isActive={page === currentPage}
+                    >
+                      {page}
+                    </PaginationLink>
+                  </PaginationItem>
+                ))}
+                
+                {currentPage < totalPages && (
+                  <PaginationItem>
+                    <PaginationNext onClick={() => handlePageChange(currentPage + 1)} />
+                  </PaginationItem>
+                )}
+              </PaginationContent>
+            </Pagination>
+          )}
+        </>
       )}
       <div className="mt-8 flex justify-between">
         <button
@@ -451,142 +480,166 @@ const CarRentalSystem = () => {
       </div>
     </div>
   );
-  const renderStep3 = () => (
-    <div className="bg-white p-8 rounded-xl shadow-lg border-l-8 border-red-600">
-      <h2 className="text-2xl font-bold mb-6">Finalisez Votre Réservation</h2>
-      {selectedCar && (
-        <div className="mb-8 p-6 bg-red-50 rounded-xl border-l-4 border-red-600">
-          <h3 className="font-bold mb-3 text-lg">Véhicule Sélectionné</h3>
-          <div className="flex items-center">
-            <div className="w-24 h-24 bg-gray-100 rounded-lg mr-6 flex-shrink-0 overflow-hidden">
-              {selectedCar.image_url ? (
-                <img
-                  src={selectedCar.image_url}
-                  alt={`${selectedCar.make} ${selectedCar.model}`}
-                  className="h-full w-full object-cover"
+  
+  const renderStep3 = () => {
+    const today = new Date();
+    const todayFormatted = today.toLocaleDateString('en-CA'); // Format as YYYY-MM-DD
+  
+    const startDate = rentalPeriod.startDate ? new Date(rentalPeriod.startDate) : undefined;
+    const endDate = rentalPeriod.endDate ? new Date(rentalPeriod.endDate) : undefined;
+  
+    return (
+      <div className="bg-white p-8 rounded-xl shadow-lg border-l-8 border-red-600">
+        <h2 className="text-2xl font-bold mb-6">Finalisez Votre Réservation</h2>
+        {selectedCar && (
+          <div className="mb-8 p-6 bg-red-50 rounded-xl border-l-4 border-red-600">
+            <h3 className="font-bold mb-3 text-lg">Véhicule Sélectionné</h3>
+            <div className="flex items-center">
+              <div className="w-24 h-24 bg-gray-100 rounded-lg mr-6 flex-shrink-0 overflow-hidden">
+                {selectedCar.image_url ? (
+                  <img
+                    src={selectedCar.image_url}
+                    alt={`${selectedCar.make} ${selectedCar.model}`}
+                    className="h-full w-full object-cover"
+                  />
+                ) : (
+                  <div className="h-full w-full flex items-center justify-center text-gray-400 text-xs font-bold">
+                    Pas d'image
+                  </div>
+                )}
+              </div>
+              <div>
+                <h4 className="font-bold text-xl">{selectedCar.make} {selectedCar.model}</h4>
+                <p className="text-sm text-gray-600 font-medium">{selectedCar.year} • {selectedCar.transmission} • {selectedCar.seats} sièges</p>
+                <p className="font-bold text-xl text-red-600 mt-1">{selectedCar.price_per_day} TND/jour</p>
+              </div>
+            </div>
+          </div>
+        )}
+        <div className="mb-8">
+          <h3 className="font-bold mb-4 text-lg">Période de Location</h3>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div className="flex flex-col items-center">
+              <label className="block text-sm font-bold text-gray-700 mb-4 text-center">Date de Prise en Charge *</label>
+              <div className="flex items-center justify-center w-full">
+                <Calendar
+                  mode="single"
+                  selected={startDate}
+                  onSelect={(date) => date && handleDateChange(date, 'start')}
+                  disabled={(date) => date < today}
+                  className="border rounded-lg p-2"
+                  locale={fr} // Set the locale to French
                 />
-              ) : (
-                <div className="h-full w-full flex items-center justify-center text-gray-400 text-xs font-bold">
-                  Pas d'image
-                </div>
+              </div>
+              {rentalPeriod.startDate && (
+                <p className="mt-2 text-sm text-red-600 font-medium">
+                  Sélectionné: {new Date(rentalPeriod.startDate).toLocaleDateString('fr-FR')}
+                </p>
               )}
             </div>
-            <div>
-              <h4 className="font-bold text-xl">{selectedCar.make} {selectedCar.model}</h4>
-              <p className="text-sm text-gray-600 font-medium">{selectedCar.year} • {selectedCar.transmission} • {selectedCar.seats} sièges</p>
-              <p className="font-bold text-xl text-red-600 mt-1">{selectedCar.price_per_day} TND/jour</p>
+            <div className="flex flex-col items-center">
+              <label className="block text-sm font-bold text-gray-700 mb-4 text-center">Date de Retour *</label>
+              <div className="flex items-center justify-center w-full">
+                <Calendar
+                  mode="single"
+                  selected={endDate}
+                  onSelect={(date) => date && handleDateChange(date, 'end')}
+                  disabled={(date) => date < (startDate || today)}
+                  className="border rounded-lg p-2"
+                  locale={fr} // Set the locale to French
+                />
+              </div>
+              {rentalPeriod.endDate && (
+                <p className="mt-2 text-sm text-red-600 font-medium">
+                  Sélectionné: {new Date(rentalPeriod.endDate).toLocaleDateString('fr-FR')}
+                </p>
+              )}
             </div>
           </div>
         </div>
-      )}
-      <div className="mb-8">
-        <h3 className="font-bold mb-4 text-lg">Période de Location</h3>
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          <div>
-            <label className="block text-sm font-bold text-gray-700 mb-2">Date de Prise en Charge *</label>
-            <input
-              type="date"
-              name="startDate"
-              value={rentalPeriod.startDate}
-              onChange={handleDateChange}
-              min={new Date().toISOString().split('T')[0]}
-              className="w-full p-3 border-2 border-gray-200 rounded-lg focus:ring-red-500 focus:border-red-500"
-            />
+        {rentalSummary.days > 0 && (
+          <div className="mb-8 p-6 bg-gray-50 rounded-xl">
+            <h3 className="font-bold mb-4 text-lg">Résumé du Prix</h3>
+            <div className="space-y-3">
+              <div className="flex justify-between text-lg">
+                <span className="font-medium">Tarif Journalier:</span>
+                <span className="font-bold">{selectedCar?.price_per_day.toFixed(2)} TND</span>
+              </div>
+              <div className="flex justify-between text-lg">
+                <span className="font-medium">Nombre de Jours:</span>
+                <span className="font-bold">{rentalSummary.days}</span>
+              </div>
+              <div className="border-t-2 pt-3 mt-3 flex justify-between text-xl">
+                <span className="font-bold">Prix Total:</span>
+                <span className="font-bold text-red-600">{rentalSummary.totalPrice.toFixed(2)} TND</span>
+              </div>
+            </div>
+            {!rentalSummary.isAvailable && (
+              <div className="mt-4 p-4 bg-red-100 text-red-700 rounded-lg">
+                <p className="font-bold">Cette voiture n'est pas disponible pour les dates sélectionnées.</p>
+                <p className="font-medium">Veuillez sélectionner d'autres dates ou revenir pour choisir un autre véhicule.</p>
+              </div>
+            )}
           </div>
-          <div>
-            <label className="block text-sm font-bold text-gray-700 mb-2">Date de Retour *</label>
-            <input
-              type="date"
-              name="endDate"
-              value={rentalPeriod.endDate}
-              onChange={handleDateChange}
-              min={rentalPeriod.startDate || new Date().toISOString().split('T')[0]}
-              className="w-full p-3 border-2 border-gray-200 rounded-lg focus:ring-red-500 focus:border-red-500"
-            />
+        )}
+        {error && (
+          <div className="mb-6 p-4 bg-red-100 text-red-700 rounded-lg font-medium">
+            {error}
           </div>
-        </div>
+        )}
+        {success ? (
+          <div className="text-center py-10">
+            <div className="w-20 h-20 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-6">
+              <svg xmlns="http://www.w3.org/2000/svg" className="h-10 w-10 text-red-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" />
+              </svg>
+            </div>
+            <h3 className="text-2xl font-bold mb-4">Réservation Confirmée!</h3>
+            <p className="text-gray-600 mb-8 text-lg">
+              Votre réservation a été créée avec succès.
+            </p>
+            <button
+              onClick={() => {
+                setStep(1);
+                setSuccess(false);
+                setSelectedCar(null);
+                setCustomerInfo({ name: '', email: '', phone: '' });
+                setRentalPeriod({ startDate: '', endDate: '' });
+              }}
+              className="bg-red-600 text-white py-3 px-8 rounded-lg font-bold hover:bg-red-700 transition-all text-lg"
+            >
+              NOUVELLE RÉSERVATION
+            </button>
+          </div>
+        ) : (
+          <div className="mt-8 flex justify-between">
+            <button
+              onClick={prevStep}
+              className="bg-white text-red-600 border-2 border-red-600 py-3 px-6 rounded-lg font-bold hover:bg-red-50 transition-all"
+            >
+              RETOUR
+            </button>
+            <button
+              onClick={handleSubmit}
+              disabled={loading || !rentalSummary.isAvailable || rentalSummary.days <= 0}
+              className={`bg-red-600 text-white py-3 px-8 rounded-lg font-bold transition-all ${
+                loading || !rentalSummary.isAvailable || rentalSummary.days <= 0
+                  ? 'opacity-50 cursor-not-allowed'
+                  : 'hover:bg-red-700'
+              }`}
+            >
+              {loading ? 'EN COURS...' : 'RÉSERVEZ'}
+            </button>
+          </div>
+        )}
       </div>
-      {rentalSummary.days > 0 && (
-        <div className="mb-8 p-6 bg-gray-50 rounded-xl">
-          <h3 className="font-bold mb-4 text-lg">Résumé du Prix</h3>
-          <div className="space-y-3">
-            <div className="flex justify-between text-lg">
-              <span className="font-medium">Tarif Journalier:</span>
-              <span className="font-bold">{selectedCar?.price_per_day.toFixed(2)} TND</span>
-            </div>
-            <div className="flex justify-between text-lg">
-              <span className="font-medium">Nombre de Jours:</span>
-              <span className="font-bold">{rentalSummary.days}</span>
-            </div>
-            <div className="border-t-2 pt-3 mt-3 flex justify-between text-xl">
-              <span className="font-bold">Prix Total:</span>
-              <span className="font-bold text-red-600">{rentalSummary.totalPrice.toFixed(2)} TND</span>
-            </div>
-          </div>
-          {!rentalSummary.isAvailable && (
-            <div className="mt-4 p-4 bg-red-100 text-red-700 rounded-lg">
-              <p className="font-bold">Cette voiture n'est pas disponible pour les dates sélectionnées.</p>
-              <p className="font-medium">Veuillez sélectionner d'autres dates ou revenir pour choisir un autre véhicule.</p>
-            </div>
-          )}
-        </div>
-      )}
-      {error && (
-        <div className="mb-6 p-4 bg-red-100 text-red-700 rounded-lg font-medium">
-          {error}
-        </div>
-      )}
-      {success ? (
-        <div className="text-center py-10">
-          <div className="w-20 h-20 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-6">
-            <svg xmlns="http://www.w3.org/2000/svg" className="h-10 w-10 text-red-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" />
-            </svg>
-          </div>
-          <h3 className="text-2xl font-bold mb-4">Réservation Confirmée!</h3>
-          <p className="text-gray-600 mb-8 text-lg">
-            Votre réservation a été créée avec succès. Un email de confirmation a été envoyé à {customerInfo.email}.
-          </p>
-          <button
-            onClick={() => {
-              setStep(1);
-              setSuccess(false);
-              setSelectedCar(null);
-              setCustomerInfo({ name: '', email: '', phone: '' });
-              setRentalPeriod({ startDate: '', endDate: '' });
-            }}
-            className="bg-red-600 text-white py-3 px-8 rounded-lg font-bold hover:bg-red-700 transition-all text-lg"
-          >
-            NOUVELLE RÉSERVATION
-          </button>
-        </div>
-      ) : (
-        <div className="mt-8 flex justify-between">
-          <button
-            onClick={prevStep}
-            className="bg-white text-red-600 border-2 border-red-600 py-3 px-6 rounded-lg font-bold hover:bg-red-50 transition-all"
-          >
-            RETOUR
-          </button>
-          <button
-            onClick={handleSubmit}
-            disabled={loading || !rentalSummary.isAvailable || rentalSummary.days <= 0}
-            className={`bg-red-600 text-white py-3 px-8 rounded-lg font-bold transition-all ${
-              loading || !rentalSummary.isAvailable || rentalSummary.days <= 0
-                ? 'opacity-50 cursor-not-allowed'
-                : 'hover:bg-red-700'
-            }`}
-          >
-            {loading ? 'EN COURS...' : 'RÉSERVEZ'}
-          </button>
-        </div>
-      )}
-    </div>
-  );
+    );
+  };
+  
 
   return (
     <section className="py-20 bg-gray-50 min" id="location">
-      <div className=" max-w-5xl mx-auto px-4">
+      <div className="max-w-5xl mx-auto px-4">
         <h1 className="text-4xl font-bold text-center mb-3 text-gray-900">LOCATION DE VOITURES PREMIUM</h1>
         <p className="text-center text-gray-600 mb-12 text-xl font-medium">Vivez le luxe à portée de main</p>
         {renderProgressBar()}
