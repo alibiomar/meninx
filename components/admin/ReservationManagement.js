@@ -128,8 +128,8 @@ export default function ReservationManagement() {
   };
 
   return (
-    <div className="space-y-8">
-      <div className="flex justify-between items-center">
+    <div className="space-y-8 p-4">
+      <div className="flex flex-col md:flex-row justify-between items-center">
         <h2 className="text-3xl font-extrabold text-gray-900">Gestion des Réservations</h2>
         <button
           onClick={() => {
@@ -147,7 +147,7 @@ export default function ReservationManagement() {
               payment_status: 'en attente',
             });
           }}
-          className="inline-flex items-center px-4 py-2 bg-gradient-to-r from-red-600 to-red-700 text-white font-semibold rounded-lg shadow-md hover:from-red-700 hover:to-red-800 transition duration-300"
+          className="inline-flex items-center px-4 py-2 bg-gradient-to-r from-red-600 to-red-700 text-white font-semibold rounded-lg shadow-md hover:from-red-700 hover:to-red-800 hover:scale-105 transition duration-300 mt-4 md:mt-0"
         >
           {showForm ? 'Annuler' : (
             <>
@@ -172,7 +172,7 @@ export default function ReservationManagement() {
                 name="car_id"
                 value={formData.car_id}
                 onChange={handleInputChange}
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-transparent transition duration-200"
+                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-4 focus:ring-red-600 focus:border-transparent transition duration-200"
                 required
               >
                 <option value="">Sélectionner une voiture</option>
@@ -190,7 +190,7 @@ export default function ReservationManagement() {
                 name="customer_name"
                 value={formData.customer_name}
                 onChange={handleInputChange}
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-transparent transition duration-200"
+                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-4 focus:ring-red-600 focus:border-transparent transition duration-200"
                 required
               />
             </div>
@@ -201,8 +201,7 @@ export default function ReservationManagement() {
                 name="customer_email"
                 value={formData.customer_email}
                 onChange={handleInputChange}
-                className="w-full px-4 py- fortsatt
-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-transparent transition duration-200"
+                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-4 focus:ring-red-600 focus:border-transparent transition duration-200"
                 required
               />
             </div>
@@ -213,7 +212,7 @@ export default function ReservationManagement() {
                 name="customer_phone"
                 value={formData.customer_phone}
                 onChange={handleInputChange}
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-transparent transition duration-200"
+                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-4 focus:ring-red-600 focus:border-transparent transition duration-200"
                 required
               />
             </div>
@@ -224,7 +223,7 @@ export default function ReservationManagement() {
                 name="start_date"
                 value={formData.start_date}
                 onChange={handleInputChange}
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-transparent transition duration-200"
+                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-4 focus:ring-red-600 focus:border-transparent transition duration-200"
                 required
               />
             </div>
@@ -235,7 +234,7 @@ export default function ReservationManagement() {
                 name="end_date"
                 value={formData.end_date}
                 onChange={handleInputChange}
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-transparent transition duration-200"
+                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-4 focus:ring-red-600 focus:border-transparent transition duration-200"
                 required
               />
             </div>
@@ -246,7 +245,7 @@ export default function ReservationManagement() {
                 name="total_price"
                 value={formData.total_price}
                 onChange={handleInputChange}
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-transparent transition duration-200"
+                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-4 focus:ring-red-600 focus:border-transparent transition duration-200"
                 required
               />
             </div>
@@ -256,7 +255,7 @@ export default function ReservationManagement() {
                 name="status"
                 value={formData.status}
                 onChange={handleInputChange}
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-transparent transition duration-200"
+                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-4 focus:ring-red-600 focus:border-transparent transition duration-200"
               >
                 <option value="en attente">En attente</option>
                 <option value="confirmé">Confirmé</option>
@@ -270,7 +269,7 @@ export default function ReservationManagement() {
                 name="payment_status"
                 value={formData.payment_status}
                 onChange={handleInputChange}
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-transparent transition duration-200"
+                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-4 focus:ring-red-600 focus:border-transparent transition duration-200"
               >
                 <option value="en attente">En attente</option>
                 <option value="payé">Payé</option>
@@ -280,7 +279,7 @@ export default function ReservationManagement() {
           </div>
           <button
             type="submit"
-            className="w-full px-4 py-2 bg-gradient-to-r from-red-600 to-red-700 text-white font-semibold rounded-lg shadow-md hover:from-red-700 hover:to-red-800 transition duration-300"
+            className="w-full px-4 py-2 bg-gradient-to-r from-red-600 to-red-700 text-white font-semibold rounded-lg shadow-md hover:from-red-700 hover:to-red-800 hover:scale-105 transition duration-300"
           >
             {editingReservation ? 'Mettre à jour' : 'Créer'}
           </button>
@@ -298,23 +297,23 @@ export default function ReservationManagement() {
               <tr>
                 <th className="px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">Client</th>
                 <th className="px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">Voiture</th>
-                <th className="px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">Dates</th>
+                <th className="hidden md:table-cell px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">Dates</th>
                 <th className="px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">Statut</th>
-                <th className="px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">Paiement</th>
+                <th className="hidden md:table-cell px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">Paiement</th>
                 <th className="px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">Actions</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-gray-200">
               {reservations.map((reservation, index) => (
-                <tr key={reservation.id} className={`hover:bg-gray-50 transition duration-150 ${index % 2 === 0 ? 'bg-white' : 'bg-gray-50'}`}>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">{reservation.customer_name}</td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-700">{reservation.cars.make} {reservation.cars.model}</td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-700">{reservation.start_date} - {reservation.end_date}</td>
-                  <td className="px-6 py-4 whitespace-nowrap">
+                <tr key={reservation.id} className={`hover:bg-gray-100 transition duration-150 ${index % 2 === 0 ? 'bg-white' : 'bg-gray-50'}`}>
+                  <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900 border border-gray-200">{reservation.customer_name}</td>
+                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-700 border border-gray-200">{reservation.cars.make} {reservation.cars.model}</td>
+                  <td className="hidden md:table-cell px-6 py-4 whitespace-nowrap text-sm text-gray-700 border border-gray-200">{reservation.start_date} - {reservation.end_date}</td>
+                  <td className="px-6 py-4 whitespace-nowrap border border-gray-200">
                     <select
                       value={reservation.status}
                       onChange={(e) => updateStatus(reservation.id, e.target.value)}
-                      className="px-2 py-1 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-transparent transition duration-200"
+                      className="px-2 py-1 border border-gray-300 rounded-lg focus:ring-4 focus:ring-red-600 focus:border-transparent transition duration-200"
                     >
                       <option value="en attente">En attente</option>
                       <option value="confirmé">Confirmé</option>
@@ -322,23 +321,23 @@ export default function ReservationManagement() {
                       <option value="terminé">Terminé</option>
                     </select>
                   </td>
-                  <td className="px-6 py-4 whitespace-nowrap">
+                  <td className="hidden md:table-cell px-6 py-4 whitespace-nowrap border border-gray-200">
                     <select
                       value={reservation.payment_status}
                       onChange={(e) => updatePaymentStatus(reservation.id, e.target.value)}
-                      className="px-2 py-1 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-transparent transition duration-200"
+                      className="px-2 py-1 border border-gray-300 rounded-lg focus:ring-4 focus:ring-red-600 focus:border-transparent transition duration-200"
                     >
                       <option value="en attente">En attente</option>
                       <option value="payé">Payé</option>
                       <option value="échoué">Échoué</option>
                     </select>
                   </td>
-                  <td className="px-6 py-4 whitespace-nowrap space-x-3">
+                  <td className="px-6 py-4 whitespace-nowrap space-x-3 border border-gray-200">
                     <button onClick={() => handleEdit(reservation)} className="text-blue-600 hover:text-blue-800">
-                      <FaEdit className="w-5 h-5" />
+                      <FaEdit className="w-6 h-6" />
                     </button>
                     <button onClick={() => handleDelete(reservation.id)} className="text-red-600 hover:text-red-800">
-                      <FaTrash className="w-5 h-5" />
+                      <FaTrash className="w-6 h-6" />
                     </button>
                   </td>
                 </tr>

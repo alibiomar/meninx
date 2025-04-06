@@ -101,8 +101,8 @@ export default function AccessoryManagement() {
   };
 
   return (
-    <div className="space-y-8">
-      <div className="flex justify-between items-center">
+    <div className="space-y-8 p-4">
+      <div className="flex flex-col md:flex-row justify-between items-center">
         <h2 className="text-3xl font-extrabold text-gray-900">Gestion des Accessoires</h2>
         <button
           onClick={() => {
@@ -119,7 +119,7 @@ export default function AccessoryManagement() {
               featured: false,
             });
           }}
-          className="inline-flex items-center px-4 py-2 bg-gradient-to-r from-red-600 to-red-700 text-white font-semibold rounded-lg shadow-md hover:from-red-700 hover:to-red-800 transition duration-300"
+          className="inline-flex items-center px-4 py-2 bg-gradient-to-r from-red-600 to-red-700 text-white font-semibold rounded-lg shadow-md hover:from-red-700 hover:to-red-800 hover:scale-105 transition duration-300 mt-4 md:mt-0"
         >
           {showForm ? 'Annuler' : (
             <>
@@ -145,7 +145,7 @@ export default function AccessoryManagement() {
                 name="name"
                 value={formData.name}
                 onChange={handleInputChange}
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-transparent transition duration-200"
+                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-4 focus:ring-red-600 focus:border-transparent transition duration-200"
                 required
               />
             </div>
@@ -156,7 +156,7 @@ export default function AccessoryManagement() {
                 name="price"
                 value={formData.price}
                 onChange={handleInputChange}
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-transparent transition duration-200"
+                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-4 focus:ring-red-600 focus:border-transparent transition duration-200"
                 required
               />
             </div>
@@ -166,7 +166,7 @@ export default function AccessoryManagement() {
                 name="description"
                 value={formData.description}
                 onChange={handleInputChange}
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-transparent transition duration-200"
+                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-4 focus:ring-red-600 focus:border-transparent transition duration-200"
                 rows="3"
               />
             </div>
@@ -177,7 +177,7 @@ export default function AccessoryManagement() {
                 name="image_url"
                 value={formData.image_url}
                 onChange={handleInputChange}
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-transparent transition duration-200"
+                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-4 focus:ring-red-600 focus:border-transparent transition duration-200"
               />
             </div>
             <div>
@@ -187,7 +187,7 @@ export default function AccessoryManagement() {
                 name="discount"
                 value={formData.discount}
                 onChange={handleInputChange}
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-transparent transition duration-200"
+                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-4 focus:ring-red-600 focus:border-transparent transition duration-200"
                 min="0"
                 max="100"
               />
@@ -199,7 +199,7 @@ export default function AccessoryManagement() {
                 name="category"
                 value={formData.category}
                 onChange={handleInputChange}
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-transparent transition duration-200"
+                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-4 focus:ring-red-600 focus:border-transparent transition duration-200"
               />
             </div>
             <div className="flex items-center space-x-6">
@@ -209,7 +209,7 @@ export default function AccessoryManagement() {
                   name="inStock"
                   checked={formData.inStock}
                   onChange={handleInputChange}
-                  className="h-4 w-4 text-red-600 focus:ring-red-500 border-gray-300 rounded"
+                  className="h-4 w-4 text-red-600 focus:ring-red-600 border-gray-300 rounded"
                 />
                 <label className="ml-2 text-sm font-medium text-gray-700">En stock</label>
               </div>
@@ -219,15 +219,15 @@ export default function AccessoryManagement() {
                   name="featured"
                   checked={formData.featured}
                   onChange={handleInputChange}
-                  className="h-4 w-4 text-red-600 focus:ring-red-500 border-gray-300 rounded"
+                  className="h-4 w-4 text-red-600 focus:ring-red-600 border-gray-300 rounded"
                 />
-dish                <label className="ml-2 text-sm font-medium text-gray-700">Mis en avant</label>
+                <label className="ml-2 text-sm font-medium text-gray-700">Mis en avant</label>
               </div>
             </div>
           </div>
           <button
             type="submit"
-            className="w-full px-4 py-2 bg-gradient-to-r from-red-600 to-red-700 text-white font-semibold rounded-lg shadow-md hover:from-red-700 hover:to-red-800 transition duration-300"
+            className="w-full px-4 py-2 bg-gradient-to-r from-red-600 to-red-700 text-white font-semibold rounded-lg shadow-md hover:from-red-700 hover:to-red-800 hover:scale-105 transition duration-300"
           >
             {editingAccessory ? 'Mettre à jour' : 'Créer'}
           </button>
@@ -245,22 +245,22 @@ dish                <label className="ml-2 text-sm font-medium text-gray-700">Mi
               <tr>
                 <th className="px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">Nom</th>
                 <th className="px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">Prix</th>
-                <th className="px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">Stock</th>
+                <th className="hidden md:table-cell px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">Stock</th>
                 <th className="px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">Actions</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-gray-200">
               {accessories.map((accessory, index) => (
-                <tr key={accessory.id} className={`hover:bg-gray-50 transition duration-150 ${index % 2 === 0 ? 'bg-white' : 'bg-gray-50'}`}>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">{accessory.name}</td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-700">{accessory.price} TND</td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-700">{accessory.inStock ? 'Oui' : 'Non'}</td>
-                  <td className="px-6 py-4 whitespace-nowrap space-x-3">
+                <tr key={accessory.id} className={`hover:bg-gray-100 transition duration-150 ${index % 2 === 0 ? 'bg-white' : 'bg-gray-50'}`}>
+                  <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900 border border-gray-200">{accessory.name}</td>
+                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-700 border border-gray-200">{accessory.price} TND</td>
+                  <td className="hidden md:table-cell px-6 py-4 whitespace-nowrap text-sm text-gray-700 border border-gray-200">{accessory.inStock ? 'Oui' : 'Non'}</td>
+                  <td className="px-6 py-4 whitespace-nowrap space-x-3 border border-gray-200">
                     <button onClick={() => handleEdit(accessory)} className="text-blue-600 hover:text-blue-800">
-                      <FaEdit className="w-5 h-5" />
+                      <FaEdit className="w-6 h-6" />
                     </button>
                     <button onClick={() => handleDelete(accessory.id)} className="text-red-600 hover:text-red-800">
-                      <FaTrash className="w-5 h-5" />
+                      <FaTrash className="w-6 h-6" />
                     </button>
                   </td>
                 </tr>

@@ -6,31 +6,39 @@ export default function Navbar() {
     const [isOpen, setIsOpen] = useState(false);
     const [scrolled, setScrolled] = useState(false);
     const [scrollProgress, setScrollProgress] = useState(0);
-    const [activeSection, setActiveSection] = useState('');
+    const [activeSection, setActiveSection] = useState('home');
     const [mounted, setMounted] = useState(false);
 
-    // Animation variants
-    const menuVariants = {
-        hidden: { opacity: 0, y: -20 },
-        visible: (index) => ({
-            opacity: 1,
-            y: 0,
-            transition: { delay: index * 0.1 + 0.2 }
-        })
+    // Streamlined animation variants
+    const linkVariants = {
+        inactive: {
+            scale: 1,
+            color: '#ffffff',
+            transition: { duration: 0.2 }
+        },
+        active: {
+            scale: 1.05,
+            color: '#ef4444', // red-500
+            transition: { duration: 0.2 }
+        },
+        hover: {
+            scale: 1.1,
+            transition: { duration: 0.2 }
+        }
     };
 
     const underlineVariants = {
-        hover: { width: '75%' },
-        active: { width: '75%' },
-        inactive: { width: '0%' }
+        inactive: { scaleX: 0, transition: { duration: 0.3 } },
+        active: { scaleX: 1, transition: { duration: 0.3 } },
+        hover: { scaleX: 0.75, transition: { duration: 0.3 } }
     };
 
     const mobileMenuVariants = {
-        open: { 
+        open: {
             x: 0,
             transition: { type: 'tween', duration: 0.3 }
         },
-        closed: { 
+        closed: {
             x: '100%',
             transition: { type: 'tween', duration: 0.3 }
         }
@@ -43,48 +51,53 @@ export default function Navbar() {
         { id: 'temoignages', label: 'Avis clients' },
     ], []);
 
-    // Intersection Observer for active section
+    // New active section detection using visibility
     useEffect(() => {
-        if (typeof window === 'undefined') return;
+        if (typeof window === 'undefined' || !mounted) return;
 
-        const observer = new IntersectionObserver(
-            (entries) => {
-                entries.forEach(entry => {
-                    if (entry.isIntersecting && entry.intersectionRatio >= 0.5) {
-                        setActiveSection(entry.target.id);
-                    }
-                });
-            },
-            { 
-                threshold: [0.25, 0.5, 0.75],
-                rootMargin: '-50px 0px -50px 0px'
+        const handleScroll = () => {
+            const sectionPositions = navItems.map(item => {
+                const element = document.getElementById(item.id);
+                if (!element) return { id: item.id, visibility: 0 };
+
+                const rect = element.getBoundingClientRect();
+                const windowHeight = window.innerHeight;
+                const visibleHeight = Math.min(rect.bottom, windowHeight) - Math.max(rect.top, 0);
+                const visibility = visibleHeight > 0 ? visibleHeight / rect.height : 0;
+
+                return { id: item.id, visibility };
+            });
+
+            const mostVisible = sectionPositions.reduce((prev, current) =>
+                prev.visibility > current.visibility ? prev : current
+            );
+
+            if (mostVisible.visibility > 0.3) {
+                setActiveSection(mostVisible.id);
             }
-        );
+        };
 
-        const sections = document.querySelectorAll("section[id]");
-        sections.forEach(section => observer.observe(section));
-
-        return () => sections.forEach(section => observer.unobserve(section));
-    }, [mounted]);
+        window.addEventListener('scroll', handleScroll, { passive: true });
+        handleScroll(); // Initial check
+        return () => window.removeEventListener('scroll', handleScroll);
+    }, [mounted, navItems]);
 
     // Scroll handlers with throttling
     useEffect(() => {
         if (typeof window === 'undefined') return;
 
         let throttleTimeout;
-        
+
         const handleScroll = () => {
             if (!throttleTimeout) {
                 throttleTimeout = setTimeout(() => {
                     const totalHeight = document.documentElement.scrollHeight - window.innerHeight;
-                    const progress = totalHeight > 0 ? 
+                    const progress = totalHeight > 0 ?
                         (window.scrollY / totalHeight) * 100 : 0;
-                    
+
                     setScrollProgress(progress);
-                    
-                    // Check if screen is in large mode (not responsive)
-                    const isLargeScreen = window.innerWidth >= 1024; // You can adjust this breakpoint
-                    
+
+                    const isLargeScreen = window.innerWidth >= 1024;
                     if (isLargeScreen) {
                         const homeSection = document.getElementById('home');
                         if (homeSection) {
@@ -95,15 +108,14 @@ export default function Navbar() {
                             setScrolled(window.scrollY > 20);
                         }
                     } else {
-                        // For smaller screens, just use a simple scroll detection
                         setScrolled(window.scrollY > 20);
                     }
-                    
+
                     throttleTimeout = null;
                 }, 100);
             }
         };
-        
+
         window.addEventListener('scroll', handleScroll);
         return () => {
             window.removeEventListener('scroll', handleScroll);
@@ -113,7 +125,6 @@ export default function Navbar() {
 
     // Menu controls
     const toggleMenu = useCallback(() => setIsOpen(prev => !prev), []);
-    
     const closeMenu = useCallback(() => setIsOpen(false), []);
 
     // Scroll to section handler
@@ -123,12 +134,12 @@ export default function Navbar() {
         if (element) {
             const headerOffset = 80;
             const position = element.offsetTop - headerOffset;
-            
+
             window.scrollTo({
                 top: position,
                 behavior: 'smooth'
             });
-            
+            setActiveSection(id.replace('#', '')); // Update active section on click
             closeMenu();
         }
     }, [closeMenu]);
@@ -138,12 +149,12 @@ export default function Navbar() {
         if (!isOpen) return;
 
         const handleKeyDown = (e) => e.key === 'Escape' && closeMenu();
-        const handleClickOutside = (e) => 
+        const handleClickOutside = (e) =>
             !e.target.closest('nav') && closeMenu();
 
         document.addEventListener('keydown', handleKeyDown);
         document.addEventListener('click', handleClickOutside);
-        
+
         return () => {
             document.removeEventListener('keydown', handleKeyDown);
             document.removeEventListener('click', handleClickOutside);
@@ -156,14 +167,13 @@ export default function Navbar() {
     const navClasses = `${scrolled ? 'fixed bg-black bg-opacity-95 shadow-lg ' : 'absolute top-0 left-0'} w-full z-50 transition-all duration-300 py-2`;
 
     return (
-        <motion.nav 
+        <motion.nav
             className={navClasses}
             initial={{ y: -100, opacity: 0 }}
             animate={{ y: 0, opacity: 1 }}
             transition={{ duration: 0.5 }}
             aria-label="Navigation principale"
         >
-            {/* Scroll progress bar */}
             {scrolled && (
                 <motion.div
                     className="h-1 bg-gradient-to-r from-red-900 via-red-700 to-red-500 absolute top-0 left-0"
@@ -178,10 +188,9 @@ export default function Navbar() {
 
             <div className={`max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex ${scrolled ? 'justify-between ' : ''} items-center`}>
                 <div className="flex items-center justify-between md:justify-start w-full h-16">
-                    {/* Logo */}
                     <div className={`flex-shrink-0 ${scrolled ? 'mr-72' : 'mr-0 '} `}>
                         <Link href="/" passHref>
-                            <motion.p 
+                            <motion.p
                                 className="flex items-center text-xl font-bold"
                                 whileHover={{ scale: 1.05 }}
                                 whileTap={{ scale: 0.95 }}
@@ -196,27 +205,30 @@ export default function Navbar() {
                     <div className="hidden md:block">
                         <div className="ml-10 flex items-baseline space-x-4">
                             {navItems.map((item) => (
-                                <motion.a
+                                <motion.div
                                     key={item.id}
-                                    href={`#${item.id}`}
+                                    className="relative flex items-center cursor-pointer justify-center"
                                     onClick={(e) => scrollToSection(e, `#${item.id}`)}
-                                    className={`px-3 py-2 text-sm font-medium relative group ${
-                                        activeSection === item.id ? 'text-red-500' : 'text-white'
-                                    }`}
-                                    whileHover={{ scale: 1.05 }}
-                                    whileTap={{ scale: 0.95 }}
-                                    aria-current={activeSection === item.id ? 'page' : undefined}
                                 >
-                                    {item.label}
+                                    <motion.a
+                                        href={`#${item.id}`}
+                                        variants={linkVariants}
+                                        initial="inactive"
+                                        animate={activeSection === item.id ? 'active' : 'inactive'}
+                                        whileHover="hover"
+                                        className="px-3 py-2 text-sm font-medium relative"
+                                        aria-current={activeSection === item.id ? 'page' : undefined}
+                                    >
+                                        {item.label}
+                                    </motion.a>
                                     <motion.span
-                                        className="absolute bottom-0 left-1/2 transform -translate-x-1/2 h-0.5 bg-red-600"
+                                        className="absolute bottom-0 left-0 h-0.5 bg-red-600 w-full"
                                         variants={underlineVariants}
                                         initial="inactive"
                                         animate={activeSection === item.id ? 'active' : 'inactive'}
                                         whileHover="hover"
-                                        transition={{ duration: 0.3 }}
                                     />
-                                </motion.a>
+                                </motion.div>
                             ))}
                         </div>
                     </div>
@@ -267,31 +279,19 @@ export default function Navbar() {
                         animate="open"
                         exit="closed"
                     >
-                        <motion.div 
+                        <motion.div
                             className="flex flex-col items-center justify-center h-full p-4 space-y-8"
-                            initial="hidden"
-                            animate="visible"
-                            exit="hidden"
-                            variants={{
-                                hidden: { opacity: 0 },
-                                visible: { 
-                                    opacity: 1,
-                                    transition: { staggerChildren: 0.1, delayChildren: 0.2 }
-                                }
-                            }}
                         >
-                            {navItems.map((item, index) => (
+                            {navItems.map((item) => (
                                 <motion.a
                                     key={item.id}
                                     href={`#${item.id}`}
                                     onClick={(e) => scrollToSection(e, `#${item.id}`)}
-                                    className={`text-2xl font-medium ${
-                                        activeSection === item.id ? 'text-red-300' : 'text-white'
-                                    }`}
-                                    variants={menuVariants}
-                                    custom={index}
-                                    whileHover={{ scale: 1.1 }}
-                                    whileTap={{ scale: 0.9 }}
+                                    variants={linkVariants}
+                                    initial="inactive"
+                                    animate={activeSection === item.id ? 'active' : 'inactive'}
+                                    whileHover="hover"
+                                    className="text-2xl font-medium"
                                 >
                                     {item.label}
                                 </motion.a>

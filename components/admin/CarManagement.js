@@ -110,8 +110,8 @@ export default function CarManagement() {
   };
 
   return (
-    <div className="space-y-8">
-      <div className="flex justify-between items-center">
+    <div className="space-y-8 p-4">
+      <div className="flex flex-col md:flex-row justify-between items-center">
         <h2 className="text-3xl font-extrabold text-gray-900">Gestion des Voitures</h2>
         <button
           onClick={() => {
@@ -131,7 +131,7 @@ export default function CarManagement() {
               description: '',
             });
           }}
-          className="inline-flex items-center px-4 py-2 bg-gradient-to-r from-red-600 to-red-700 text-white font-semibold rounded-lg shadow-md hover:from-red-700 hover:to-red-800 transition duration-300"
+          className="inline-flex items-center px-4 py-2 bg-gradient-to-r from-red-600 to-red-700 text-white font-semibold rounded-lg shadow-md hover:from-red-700 hover:to-red-800 hover:scale-105 transition duration-300 mt-4 md:mt-0"
         >
           {showForm ? 'Annuler' : (
             <>
@@ -157,7 +157,7 @@ export default function CarManagement() {
                 name="make"
                 value={formData.make}
                 onChange={handleInputChange}
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-transparent transition duration-200"
+                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-4 focus:ring-red-600 focus:border-transparent transition duration-200"
                 required
               />
             </div>
@@ -168,7 +168,7 @@ export default function CarManagement() {
                 name="model"
                 value={formData.model}
                 onChange={handleInputChange}
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-transparent transition duration-200"
+                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-4 focus:ring-red-600 focus:border-transparent transition duration-200"
                 required
               />
             </div>
@@ -179,7 +179,7 @@ export default function CarManagement() {
                 name="year"
                 value={formData.year}
                 onChange={handleInputChange}
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-transparent transition duration-200"
+                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-4 focus:ring-red-600 focus:border-transparent transition duration-200"
                 required
               />
             </div>
@@ -190,7 +190,7 @@ export default function CarManagement() {
                 name="price_per_day"
                 value={formData.price_per_day}
                 onChange={handleInputChange}
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-transparent transition duration-200"
+                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-4 focus:ring-red-600 focus:border-transparent transition duration-200"
                 required
               />
             </div>
@@ -200,7 +200,7 @@ export default function CarManagement() {
                 name="transmission"
                 value={formData.transmission}
                 onChange={handleInputChange}
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-transparent transition duration-200"
+                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-4 focus:ring-red-600 focus:border-transparent transition duration-200"
               >
                 <option value="Automatic">Automatique</option>
                 <option value="Manual">Manuelle</option>
@@ -212,7 +212,7 @@ export default function CarManagement() {
                 name="fuel_type"
                 value={formData.fuel_type}
                 onChange={handleInputChange}
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-transparent transition duration-200"
+                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-4 focus:ring-red-600 focus:border-transparent transition duration-200"
               >
                 <option value="Petrol">Essence</option>
                 <option value="Diesel">Diesel</option>
@@ -227,7 +227,7 @@ export default function CarManagement() {
                 name="seats"
                 value={formData.seats}
                 onChange={handleInputChange}
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-transparent transition duration-200"
+                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-4 focus:ring-red-600 focus:border-transparent transition duration-200"
                 required
               />
             </div>
@@ -238,7 +238,7 @@ export default function CarManagement() {
                 name="color"
                 value={formData.color}
                 onChange={handleInputChange}
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-transparent transition duration-200"
+                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-4 focus:ring-red-600 focus:border-transparent transition duration-200"
                 required
               />
             </div>
@@ -248,7 +248,7 @@ export default function CarManagement() {
                 name="category"
                 value={formData.category}
                 onChange={handleInputChange}
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-transparent transition duration-200"
+                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-4 focus:ring-red-600 focus:border-transparent transition duration-200"
               >
                 <option value="Sedan">Sedan</option>
                 <option value="SUV">SUV</option>
@@ -263,7 +263,7 @@ export default function CarManagement() {
                 name="description"
                 value={formData.description}
                 onChange={handleInputChange}
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-transparent transition duration-200"
+                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-4 focus:ring-red-600 focus:border-transparent transition duration-200"
                 rows="4"
                 placeholder="Entrez une description de la voiture..."
               />
@@ -275,13 +275,13 @@ export default function CarManagement() {
                 name="image_url"
                 value={formData.image_url}
                 onChange={handleInputChange}
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-transparent transition duration-200"
+                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-4 focus:ring-red-600 focus:border-transparent transition duration-200"
               />
             </div>
           </div>
           <button
             type="submit"
-            className="w-full px-4 py-2 bg-gradient-to-r from-red-600 to-red-700 text-white font-semibold rounded-lg shadow-md hover:from-red-700 hover:to-red-800 transition duration-300"
+            className="w-full px-4 py-2 bg-gradient-to-r from-red-600 to-red-700 text-white font-semibold rounded-lg shadow-md hover:from-red-700 hover:to-red-800 hover:scale-105 transition duration-300"
           >
             {editingCar ? 'Mettre à jour' : 'Créer'}
           </button>
@@ -299,26 +299,26 @@ export default function CarManagement() {
               <tr>
                 <th className="px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">Marque</th>
                 <th className="px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">Modèle</th>
-                <th className="px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">Année</th>
+                <th className="hidden md:table-cell px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">Année</th>
                 <th className="px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">Prix/Jour</th>
-                <th className="px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">Catégorie</th>
+                <th className="hidden md:table-cell px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">Catégorie</th>
                 <th className="px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">Actions</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-gray-200">
               {cars.map((car, index) => (
-                <tr key={car.id} className={`hover:bg-gray-50 transition duration-150 ${index % 2 === 0 ? 'bg-white' : 'bg-gray-50'}`}>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">{car.make}</td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-700">{car.model}</td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-700">{car.year}</td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-700">{car.price_per_day} TND</td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-700">{car.category}</td>
-                  <td className="px-6 py-4 whitespace-nowrap space-x-3">
+                <tr key={car.id} className={`hover:bg-gray-100 transition duration-150 ${index % 2 === 0 ? 'bg-white' : 'bg-gray-50'}`}>
+                  <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900 border border-gray-200">{car.make}</td>
+                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-700 border border-gray-200">{car.model}</td>
+                  <td className="hidden md:table-cell px-6 py-4 whitespace-nowrap text-sm text-gray-700 border border-gray-200">{car.year}</td>
+                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-700 border border-gray-200">{car.price_per_day} TND</td>
+                  <td className="hidden md:table-cell px-6 py-4 whitespace-nowrap text-sm text-gray-700 border border-gray-200">{car.category}</td>
+                  <td className="px-6 py-4 whitespace-nowrap space-x-3 border border-gray-200">
                     <button onClick={() => handleEdit(car)} className="text-blue-600 hover:text-blue-800">
-                      <FaEdit className="w-5 h-5" />
+                      <FaEdit className="w-6 h-6" />
                     </button>
                     <button onClick={() => handleDelete(car.id)} className="text-red-600 hover:text-red-800">
-                      <FaTrash className="w-5 h-5" />
+                      <FaTrash className="w-6 h-6" />
                     </button>
                   </td>
                 </tr>

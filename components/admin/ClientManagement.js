@@ -61,12 +61,12 @@ export default function ClientManagement() {
           placeholder="Rechercher par nom, email ou téléphone..."
           value={searchQuery}
           onChange={(e) => setSearchQuery(e.target.value)}
-          className="w-full md:w-1/2 px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-transparent transition duration-200"
+          className="w-full md:w-1/2 px-4 py-2 border border-gray-300 rounded-lg shadow-sm focus:ring-4 focus:ring-red-600 focus:border-transparent transition duration-200"
         />
         <select
           value={sortOption}
           onChange={(e) => setSortOption(e.target.value)}
-          className="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-transparent transition duration-200"
+          className="px-4 py-2 border border-gray-300 rounded-lg shadow-sm focus:ring-4 focus:ring-red-600 focus:border-transparent transition duration-200"
         >
           <option value="alphabetical">Trier par ordre alphabétique</option>
           <option value="most_redundant">Trier par plus de réservations</option>
@@ -84,17 +84,17 @@ export default function ClientManagement() {
               <tr>
                 <th className="px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">Nom</th>
                 <th className="px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">Email</th>
-                <th className="px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">Téléphone</th>
-                <th className="px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">Nombre de réservations</th>
+                <th className="hidden md:table-cell px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">Téléphone</th>
+                <th className="px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">Réservations</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-gray-200">
               {filteredClients.map((client, index) => (
-                <tr key={index} className={`hover:bg-gray-50 transition duration-150 ${index % 2 === 0 ? 'bg-white' : 'bg-gray-50'}`}>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">{client.customer_name}</td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-700">{client.customer_email}</td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-700">{client.customer_phone || 'Non fourni'}</td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-700">{client.count}</td>
+                <tr key={index} className={`hover:bg-gray-100 transition duration-150 ${index % 2 === 0 ? 'bg-white' : 'bg-gray-50'}`}>
+                  <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900 border border-gray-200">{client.customer_name}</td>
+                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-700 border border-gray-200">{client.customer_email}</td>
+                  <td className="hidden md:table-cell px-6 py-4 whitespace-nowrap text-sm text-gray-700 border border-gray-200">{client.customer_phone || 'Non fourni'}</td>
+                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-700 border border-gray-200">{client.count}</td>
                 </tr>
               ))}
             </tbody>
