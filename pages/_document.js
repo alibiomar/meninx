@@ -6,7 +6,7 @@ class MyDocument extends Document {
       <Html lang="fr">
         <Head>
           <meta charSet="UTF-8" />
-          <meta name="theme-color" content="#2563EB" />
+          <meta name="theme-color" content="#000000" />
 
           <meta name="description" content="MENINX Car vous propose la location de voitures et la vente d’accessoires automobiles au meilleur prix." />
           <meta name="keywords" content="location voiture, louer une voiture, accessoires auto, vente accessoires automobile" />
