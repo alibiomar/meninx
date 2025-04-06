@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { getCars, checkCarAvailability, createReservation } from '@/lib/supabase';
-import { fr } from 'date-fns/locale'; 
+import { fr } from 'date-fns/locale';
 import { Calendar } from '@/components/ui/calendar';
 import {
   Pagination,
@@ -11,7 +11,7 @@ import {
   PaginationNext,
 } from '@/components/ui/pagination';
 
-// Fonction de notification par email
+// Fonction de notification par email (pour admin et client)
 const sendAdminEmail = async (reservationData) => {
   try {
     const response = await fetch('/api/send-admin-email', {
@@ -19,7 +19,22 @@ const sendAdminEmail = async (reservationData) => {
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(reservationData),
     });
-    if (!response.ok) throw new Error('Échec de l\'envoi de la notification à l\'administrateur');
+    if (!response.ok) throw new Error("Échec de l'envoi de la notification à l'administrateur");
+    return true;
+  } catch (error) {
+    console.error(error);
+    return false;
+  }
+};
+
+const sendCustomerEmail = async (reservationData) => {
+  try {
+    const response = await fetch('/api/send-customer-email', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(reservationData),
+    });
+    if (!response.ok) throw new Error("Échec de l'envoi de la confirmation au client");
     return true;
   } catch (error) {
     console.error(error);
@@ -28,11 +43,12 @@ const sendAdminEmail = async (reservationData) => {
 };
 
 const CarRentalSystem = () => {
-  // Gestion des états
+  // États
   const [step, setStep] = useState(1);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
   const [success, setSuccess] = useState(false);
+  const [reservationId, setReservationId] = useState(null); // To store reservation ID for confirmation
 
   // Informations du client
   const [customerInfo, setCustomerInfo] = useState({ name: '', email: '', phone: '' });
@@ -60,23 +76,27 @@ const CarRentalSystem = () => {
   );
 
   // Résumé de la location
-  const [rentalSummary, setRentalSummary] = useState({ days: 0, totalPrice: 0, isAvailable: true });
+  const [rentalSummary, setRentalSummary] = useState({
+    days: 0,
+    totalPrice: 0,
+    isAvailable: true,
+  });
 
-  // Charger les données des voitures au rendu initial
+  // Charger les données des voitures
   useEffect(() => {
-    const loadCarsData = async () => {
+    const loadData = async () => {
       setLoading(true);
       try {
         const carsData = await getCars();
         setCars(carsData);
         setFilteredCars(carsData);
       } catch (err) {
-        setError('Échec du chargement des voitures disponibles. Veuillez réessayer.');
+        setError('Échec du chargement des données. Veuillez réessayer.');
       } finally {
         setLoading(false);
       }
     };
-    loadCarsData();
+    loadData();
   }, []);
 
   // Appliquer les filtres lorsque l'état des filtres change
@@ -88,19 +108,22 @@ const CarRentalSystem = () => {
       return priceMatch && transmissionMatch && categoryMatch;
     });
     setFilteredCars(filtered);
-    setCurrentPage(1); // Reset to first page when filters change
+    setCurrentPage(1);
   }, [filters, cars]);
 
   // Calculer les détails de la location
   useEffect(() => {
     const calculateRental = async () => {
-      if (!selectedCar || !rentalPeriod.startDate || !rentalPeriod.endDate) return;
+      if (!selectedCar || !rentalPeriod.startDate || !rentalPeriod.endDate) {
+        setRentalSummary({ days: 0, totalPrice: 0, isAvailable: true });
+        return;
+      }
 
       const start = new Date(rentalPeriod.startDate);
       const end = new Date(rentalPeriod.endDate);
 
       if (start >= end) {
-        setRentalSummary((prev) => ({ ...prev, days: 0, totalPrice: 0 }));
+        setRentalSummary({ days: 0, totalPrice: 0, isAvailable: true });
         return;
       }
 
@@ -110,6 +133,7 @@ const CarRentalSystem = () => {
 
       setRentalSummary((prev) => ({ ...prev, days, totalPrice, isAvailable: true }));
 
+      setLoading(true);
       try {
         const { isAvailable } = await checkCarAvailability(
           selectedCar.id,
@@ -119,6 +143,8 @@ const CarRentalSystem = () => {
         setRentalSummary((prev) => ({ ...prev, isAvailable }));
       } catch (err) {
         setError('Échec de la vérification de la disponibilité de la voiture. Veuillez réessayer.');
+      } finally {
+        setLoading(false);
       }
     };
 
@@ -131,15 +157,15 @@ const CarRentalSystem = () => {
     setCustomerInfo((prev) => ({ ...prev, [name]: value }));
   };
 
-const handleDateChange = (date, type) => {
-  const formattedDate = date.toLocaleDateString('en-CA'); // Format as YYYY-MM-DD
-  if (type === 'start') {
-    setRentalPeriod((prev) => ({ ...prev, startDate: formattedDate }));
-  } else {
-    setRentalPeriod((prev) => ({ ...prev, endDate: formattedDate }));
-  }
-};
-
+  const handleDateChange = (date, type) => {
+    if (!date) return;
+    const formattedDate = date.toLocaleDateString('en-CA'); // Format as YYYY-MM-DD
+    if (type === 'start') {
+      setRentalPeriod((prev) => ({ ...prev, startDate: formattedDate }));
+    } else {
+      setRentalPeriod((prev) => ({ ...prev, endDate: formattedDate }));
+    }
+  };
 
   const handleFilterChange = (name, value) => {
     setFilters((prev) => ({ ...prev, [name]: value }));
@@ -151,29 +177,41 @@ const handleDateChange = (date, type) => {
 
   const validateCustomerInfo = () => {
     const { name, email, phone } = customerInfo;
-    if (!name.trim()) return 'Le nom est requis';
-    if (!email.trim() || !/^\S+@\S+\.\S+$/.test(email)) return 'Le format de l\'email est invalide';
-    if (!phone.trim()) return 'Le numéro de téléphone est requis';
+    if (!name.trim()) return 'Le nom complet est requis.';
+    if (name.length < 2) return 'Le nom doit contenir au moins 2 caractères.';
+    if (!email.trim() || !/^\S+@\S+\.\S+$/.test(email)) return "Le format de l'email est invalide.";
+    if (!phone.trim() || !/^\+?[1-9]\d{1,14}$/.test(phone))
+      return 'Le numéro de téléphone est invalide (ex: +21612345678).';
     return null;
   };
 
   const validateRentalPeriod = () => {
     const { startDate, endDate } = rentalPeriod;
-    if (!startDate) return 'La date de début est requise';
-    if (!endDate) return 'La date de fin est requise';
-    if (new Date(startDate) >= new Date(endDate)) return 'La date de fin doit être après la date de début';
+    if (!startDate) return 'La date de début est requise.';
+    if (!endDate) return 'La date de fin est requise.';
+    const start = new Date(startDate);
+    const end = new Date(endDate);
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    if (start < today) return 'La date de début ne peut pas être antérieure à aujourd’hui.';
+    if (end <= start) return 'La date de fin doit être après la date de début.';
+    if (rentalSummary.days > 30) return 'La période de location ne peut pas dépasser 30 jours.';
     return null;
   };
 
   const handleSubmit = async () => {
+    const customerError = validateCustomerInfo();
     const periodError = validateRentalPeriod();
+    if (customerError) {
+      setError(customerError);
+      return;
+    }
     if (periodError) {
       setError(periodError);
       return;
     }
-
     if (!rentalSummary.isAvailable) {
-      setError('Cette voiture n\'est pas disponible pour les dates sélectionnées. Veuillez choisir d\'autres dates ou une autre voiture.');
+      setError('Cette voiture n’est pas disponible pour les dates sélectionnées.');
       return;
     }
 
@@ -189,13 +227,22 @@ const handleDateChange = (date, type) => {
         start_date: rentalPeriod.startDate,
         end_date: rentalPeriod.endDate,
         total_price: rentalSummary.totalPrice,
-        status: 'confirmé',
+        status: 'en attente', // Set to 'en attente' initially
         payment_status: 'en attente',
         car_details: { make: selectedCar.make, model: selectedCar.model, year: selectedCar.year },
       };
 
-      await createReservation(reservationData);
-      await sendAdminEmail(reservationData);
+      const reservation = await createReservation(reservationData);
+      setReservationId(reservation.id); // Store reservation ID for confirmation
+      await Promise.all([
+        sendAdminEmail(reservationData),
+        sendCustomerEmail({
+          ...reservationData,
+          reservationId: reservation.id,
+          startDateFormatted: new Date(rentalPeriod.startDate).toLocaleDateString('fr-FR'),
+          endDateFormatted: new Date(rentalPeriod.endDate).toLocaleDateString('fr-FR'),
+        }),
+      ]);
       setSuccess(true);
     } catch (err) {
       setError('Échec de la réservation. Veuillez réessayer.');
@@ -212,7 +259,7 @@ const handleDateChange = (date, type) => {
         return;
       }
     } else if (step === 2 && !selectedCar) {
-      setError('Veuillez sélectionner une voiture pour continuer');
+      setError('Veuillez sélectionner une voiture pour continuer.');
       return;
     }
     setError(null);
@@ -234,14 +281,18 @@ const handleDateChange = (date, type) => {
     return (
       <div
         key={car.id}
-        className={`p-6 rounded-lg ${
-          isSelected ? 'ring-4 ring-red-600 bg-red-50' : 'border border-gray-100'
+        className={`p-6 rounded-lg transition-all cursor-pointer ${
+          isSelected ? 'ring-4 ring-red-600 bg-red-50' : 'border border-gray-200 hover:shadow-lg'
         }`}
         onClick={() => handleCarSelect(car)}
       >
         <div className="h-40 bg-gray-100 mb-4 rounded-lg flex items-center justify-center overflow-hidden">
           {car.image_url ? (
-            <img src={car.image_url} alt={`${car.make} ${car.model}`} className="h-full w-full object-cover rounded-lg" />
+            <img
+              src={car.image_url}
+              alt={`${car.make} ${car.model}`}
+              className="h-full w-full object-cover rounded-lg"
+            />
           ) : (
             <span className="text-gray-400 font-bold">{car.make} {car.model}</span>
           )}
@@ -275,30 +326,29 @@ const handleDateChange = (date, type) => {
     const steps = [
       { number: 1, label: 'Vos Informations' },
       { number: 2, label: 'Sélectionnez un Véhicule' },
-      { number: 3, label: 'Finalisez la Réservation' }
+      { number: 3, label: 'Finalisez la Réservation' },
     ];
 
     return (
       <div className="relative mb-10">
-        {/* Barre de progression */}
         <div className="h-2 bg-gray-200 rounded-full">
-          {/* Remplissage de la progression */}
           <div
             className="h-full bg-red-600 rounded-full transition-all duration-300"
             style={{ width: `${((step - 1) / (steps.length - 1)) * 100}%` }}
           />
         </div>
-
-        {/* Indicateurs d'étape */}
         <div className="flex justify-between mt-6">
           {steps.map((s, index) => (
             <div key={s.number} className="flex-1 flex flex-col items-center">
-              {/* Numéro de l'étape */}
               <div
                 className={`flex items-center justify-center w-12 h-12 rounded-full border-2 transition-all duration-300
-                  ${step > index + 1 ? 'bg-red-600 border-red-600 text-white' :
-                  step === index + 1 ? 'bg-red-100 border-red-600 text-red-600' :
-                  'bg-white border-gray-300 text-gray-400'}`}
+                  ${
+                    step > index + 1
+                      ? 'bg-red-600 border-red-600 text-white'
+                      : step === index + 1
+                      ? 'bg-red-100 border-red-600 text-red-600'
+                      : 'bg-white border-gray-300 text-gray-400'
+                  }`}
               >
                 {step > index + 1 ? (
                   <svg className="w-6 h-6" viewBox="0 0 24 24" fill="none" stroke="currentColor">
@@ -308,8 +358,11 @@ const handleDateChange = (date, type) => {
                   s.number
                 )}
               </div>
-              {/* Libellé de l'étape */}
-              <span className={`mt-2 text-sm font-medium ${step >= index + 1 ? 'text-gray-900' : 'text-gray-400'}`}>
+              <span
+                className={`mt-2 text-sm font-medium ${
+                  step >= index + 1 ? 'text-gray-900' : 'text-gray-400'
+                }`}
+              >
                 {s.label}
               </span>
             </div>
@@ -357,10 +410,13 @@ const handleDateChange = (date, type) => {
           />
         </div>
       </div>
-      <div className="mt-8">
+      {error && (
+        <div className="mt-4 p-4 bg-red-100 text-red-700 rounded-lg font-medium">{error}</div>
+      )}
+      <div className="mt-8 flex justify-center">
         <button
           onClick={nextStep}
-          className="w-full bg-red-600 text-white py-4 px-6 rounded-lg font-bold text-lg hover:bg-red-700 transition-all"
+          className="w-full bg-red-600 text-white py-3 px-4 rounded-lg font-bold text-lg hover:bg-red-700 transition-all"
         >
           CONTINUER
         </button>
@@ -384,7 +440,9 @@ const handleDateChange = (date, type) => {
                 max="500"
                 step="10"
                 value={filters.priceRange[1]}
-                onChange={(e) => handleFilterChange('priceRange', [filters.priceRange[0], parseInt(e.target.value)])}
+                onChange={(e) =>
+                  handleFilterChange('priceRange', [filters.priceRange[0], parseInt(e.target.value)])
+                }
                 className="flex-grow accent-red-600"
               />
               <span className="font-medium">{filters.priceRange[1]} TND</span>
@@ -424,7 +482,9 @@ const handleDateChange = (date, type) => {
         </div>
       ) : filteredCars.length === 0 ? (
         <div className="text-center py-16">
-          <p className="text-gray-500 font-medium text-lg">Aucune voiture ne correspond à vos filtres. Veuillez ajuster vos critères.</p>
+          <p className="text-gray-500 font-medium text-lg">
+            Aucune voiture ne correspond à vos filtres. Veuillez ajuster vos critères.
+          </p>
         </div>
       ) : (
         <>
@@ -439,10 +499,9 @@ const handleDateChange = (date, type) => {
                     <PaginationPrevious onClick={() => handlePageChange(currentPage - 1)} />
                   </PaginationItem>
                 )}
-                
                 {Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => (
                   <PaginationItem key={page}>
-                    <PaginationLink 
+                    <PaginationLink
                       onClick={() => handlePageChange(page)}
                       isActive={page === currentPage}
                     >
@@ -450,7 +509,6 @@ const handleDateChange = (date, type) => {
                     </PaginationLink>
                   </PaginationItem>
                 ))}
-                
                 {currentPage < totalPages && (
                   <PaginationItem>
                     <PaginationNext onClick={() => handlePageChange(currentPage + 1)} />
@@ -461,17 +519,20 @@ const handleDateChange = (date, type) => {
           )}
         </>
       )}
+      {error && (
+        <div className="mt-4 p-4 bg-red-100 text-red-700 rounded-lg font-medium">{error}</div>
+      )}
       <div className="mt-8 flex justify-between">
         <button
           onClick={prevStep}
-          className="bg-white text-red-600 border-2 border-red-600 py-3 px-6 rounded-lg font-bold hover:bg-red-50 transition-all"
+          className="bg-white text-red-600 border-2 border-red-600 py-2 px-4 rounded-lg font-bold hover:bg-red-50 transition-all"
         >
           RETOUR
         </button>
         <button
           onClick={nextStep}
           disabled={!selectedCar}
-          className={`bg-red-600 text-white py-3 px-8 rounded-lg font-bold transition-all ${
+          className={`bg-red-600 text-white py-3 px-5 rounded-lg font-bold transition-all ${
             !selectedCar ? 'opacity-50 cursor-not-allowed' : 'hover:bg-red-700'
           }`}
         >
@@ -480,14 +541,12 @@ const handleDateChange = (date, type) => {
       </div>
     </div>
   );
-  
+
   const renderStep3 = () => {
     const today = new Date();
-    const todayFormatted = today.toLocaleDateString('en-CA'); // Format as YYYY-MM-DD
-  
     const startDate = rentalPeriod.startDate ? new Date(rentalPeriod.startDate) : undefined;
     const endDate = rentalPeriod.endDate ? new Date(rentalPeriod.endDate) : undefined;
-  
+
     return (
       <div className="bg-white p-8 rounded-xl shadow-lg border-l-8 border-red-600">
         <h2 className="text-2xl font-bold mb-6">Finalisez Votre Réservation</h2>
@@ -510,8 +569,12 @@ const handleDateChange = (date, type) => {
               </div>
               <div>
                 <h4 className="font-bold text-xl">{selectedCar.make} {selectedCar.model}</h4>
-                <p className="text-sm text-gray-600 font-medium">{selectedCar.year} • {selectedCar.transmission} • {selectedCar.seats} sièges</p>
-                <p className="font-bold text-xl text-red-600 mt-1">{selectedCar.price_per_day} TND/jour</p>
+                <p className="text-sm text-gray-600 font-medium">
+                  {selectedCar.year} • {selectedCar.transmission} • {selectedCar.seats} sièges
+                </p>
+                <p className="font-bold text-xl text-red-600 mt-1">
+                  {selectedCar.price_per_day} TND/jour
+                </p>
               </div>
             </div>
           </div>
@@ -520,15 +583,17 @@ const handleDateChange = (date, type) => {
           <h3 className="font-bold mb-4 text-lg">Période de Location</h3>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <div className="flex flex-col items-center">
-              <label className="block text-sm font-bold text-gray-700 mb-4 text-center">Date de Prise en Charge *</label>
+              <label className="block text-sm font-bold text-gray-700 mb-4 text-center">
+                Date de Prise en Charge *
+              </label>
               <div className="flex items-center justify-center w-full">
                 <Calendar
                   mode="single"
                   selected={startDate}
-                  onSelect={(date) => date && handleDateChange(date, 'start')}
+                  onSelect={(date) => handleDateChange(date, 'start')}
                   disabled={(date) => date < today}
                   className="border rounded-lg p-2"
-                  locale={fr} // Set the locale to French
+                  locale={fr}
                 />
               </div>
               {rentalPeriod.startDate && (
@@ -538,15 +603,17 @@ const handleDateChange = (date, type) => {
               )}
             </div>
             <div className="flex flex-col items-center">
-              <label className="block text-sm font-bold text-gray-700 mb-4 text-center">Date de Retour *</label>
+              <label className="block text-sm font-bold text-gray-700 mb-4 text-center">
+                Date de Retour *
+              </label>
               <div className="flex items-center justify-center w-full">
                 <Calendar
                   mode="single"
                   selected={endDate}
-                  onSelect={(date) => date && handleDateChange(date, 'end')}
+                  onSelect={(date) => handleDateChange(date, 'end')}
                   disabled={(date) => date < (startDate || today)}
                   className="border rounded-lg p-2"
-                  locale={fr} // Set the locale to French
+                  locale={fr}
                 />
               </div>
               {rentalPeriod.endDate && (
@@ -559,10 +626,10 @@ const handleDateChange = (date, type) => {
         </div>
         {rentalSummary.days > 0 && (
           <div className="mb-8 p-6 bg-gray-50 rounded-xl">
-            <h3 className="font-bold mb-4 text-lg">Résumé du Prix</h3>
+            <h3 className="font-bold mb-4 text-lg">Résumé de la Réservation</h3>
             <div className="space-y-3">
               <div className="flex justify-between text-lg">
-                <span className="font-medium">Tarif Journalier:</span>
+                <span className="font-medium">Tarif Journalier (Voiture):</span>
                 <span className="font-bold">{selectedCar?.price_per_day.toFixed(2)} TND</span>
               </div>
               <div className="flex justify-between text-lg">
@@ -574,29 +641,47 @@ const handleDateChange = (date, type) => {
                 <span className="font-bold text-red-600">{rentalSummary.totalPrice.toFixed(2)} TND</span>
               </div>
             </div>
-            {!rentalSummary.isAvailable && (
+            {loading ? (
+              <div className="mt-4 flex justify-center">
+                <div className="animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-red-600"></div>
+              </div>
+            ) : rentalSummary.isAvailable ? (
+              <div className="mt-4 p-4 bg-green-100 text-green-700 rounded-lg">
+                <p className="font-bold">Voiture disponible pour les dates sélectionnées !</p>
+                <p className="font-medium">Vous pouvez procéder à la réservation.</p>
+              </div>
+            ) : (
               <div className="mt-4 p-4 bg-red-100 text-red-700 rounded-lg">
                 <p className="font-bold">Cette voiture n'est pas disponible pour les dates sélectionnées.</p>
-                <p className="font-medium">Veuillez sélectionner d'autres dates ou revenir pour choisir un autre véhicule.</p>
+                <p className="font-medium">
+                  Veuillez sélectionner d'autres dates ou revenir pour choisir un autre véhicule.
+                </p>
               </div>
             )}
           </div>
         )}
         {error && (
-          <div className="mb-6 p-4 bg-red-100 text-red-700 rounded-lg font-medium">
-            {error}
-          </div>
+          <div className="mb-6 p-4 bg-red-100 text-red-700 rounded-lg font-medium">{error}</div>
         )}
         {success ? (
           <div className="text-center py-10">
             <div className="w-20 h-20 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-6">
-              <svg xmlns="http://www.w3.org/2000/svg" className="h-10 w-10 text-red-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                className="h-10 w-10 text-red-600"
+                fill="none"
+                viewBox="0 0 24 24"
+                stroke="currentColor"
+              >
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" />
               </svg>
             </div>
-            <h3 className="text-2xl font-bold mb-4">Réservation Confirmée!</h3>
+            <h3 className="text-2xl font-bold mb-4">Réservation Confirmée !</h3>
+            <p className="text-gray-600 mb-4 text-lg">
+              Votre réservation (ID: {reservationId}) a été créée avec succès.
+            </p>
             <p className="text-gray-600 mb-8 text-lg">
-              Votre réservation a été créée avec succès.
+              Un email de confirmation a été envoyé à {customerInfo.email}.
             </p>
             <button
               onClick={() => {
@@ -605,8 +690,9 @@ const handleDateChange = (date, type) => {
                 setSelectedCar(null);
                 setCustomerInfo({ name: '', email: '', phone: '' });
                 setRentalPeriod({ startDate: '', endDate: '' });
+                setReservationId(null);
               }}
-              className="bg-red-600 text-white py-3 px-8 rounded-lg font-bold hover:bg-red-700 transition-all text-lg"
+              className="bg-red-600 text-white py-3 px-8 rounded-lg  font-bold hover:bg-red-700 transition-all text-lg"
             >
               NOUVELLE RÉSERVATION
             </button>
@@ -615,14 +701,14 @@ const handleDateChange = (date, type) => {
           <div className="mt-8 flex justify-between">
             <button
               onClick={prevStep}
-              className="bg-white text-red-600 border-2 border-red-600 py-3 px-6 rounded-lg font-bold hover:bg-red-50 transition-all"
+              className="bg-white text-red-600 border-2 border-red-600 py-2  px-4 rounded-lg font-bold hover:bg-red-50 transition-all"
             >
               RETOUR
             </button>
             <button
               onClick={handleSubmit}
               disabled={loading || !rentalSummary.isAvailable || rentalSummary.days <= 0}
-              className={`bg-red-600 text-white py-3 px-8 rounded-lg font-bold transition-all ${
+              className={`bg-red-600 text-white py-3 px-5  rounded-lg font-bold transition-all ${
                 loading || !rentalSummary.isAvailable || rentalSummary.days <= 0
                   ? 'opacity-50 cursor-not-allowed'
                   : 'hover:bg-red-700'
@@ -635,19 +721,16 @@ const handleDateChange = (date, type) => {
       </div>
     );
   };
-  
 
   return (
-    <section className="py-20 bg-gray-50 min" id="location">
+    <section className="py-20 bg-gray-50 min-h-screen" id="location">
       <div className="max-w-5xl mx-auto px-4">
         <h1 className="text-4xl font-bold text-center mb-3 text-gray-900">LOCATION DE VOITURES PREMIUM</h1>
         <p className="text-center text-gray-600 mb-12 text-xl font-medium">Vivez le luxe à portée de main</p>
         {renderProgressBar()}
-        <div className="max-w-5xl mx-auto">
-          {step === 1 && renderStep1()}
-          {step === 2 && renderStep2()}
-          {step === 3 && renderStep3()}
-        </div>
+        <div className="max-w-5xl mx-auto">{step === 1 && renderStep1()}</div>
+        <div className="max-w-7xl mx-auto">{step === 2 && renderStep2()}</div>
+        <div className="max-w-5xl mx-auto">{step === 3 && renderStep3()}</div>
       </div>
     </section>
   );

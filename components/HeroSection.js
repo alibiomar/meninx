@@ -118,7 +118,7 @@ export default function HeroSection() {
     href="#location"
     onClick={(e) => scrollToSection(e, '#location')}
     className="flex items-center justify-center px-8 py-4 md:px-6 md:py-4 bg-red-600 text-white font-bold rounded-lg 
-    hover:bg-red-700 transition-all duration-300 group shadow-lg shadow-red-900/30 text-md md:text-sm w-auto sm:w-full"
+    hover:bg-red-700 transition-all duration-300 group shadow-lg shadow-red-900/30 text-md md:text-sm w-2/3 sm:w-full"
   >
     <Calendar className="mr-3 h-4 w-4 md:h-5 md:w-5 group-hover:animate-pulse" />
     Louer maintenant
